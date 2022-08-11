@@ -1,0 +1,135 @@
+%# BEGIN BPS TAGGED BLOCK {{{
+%#
+%# COPYRIGHT:
+%#
+%# This software is Copyright (c) 1996-2021 Best Practical Solutions, LLC
+%#                                          <sales@bestpractical.com>
+%#
+%# (Except where explicitly superseded by other copyright notices)
+%#
+%#
+%# LICENSE:
+%#
+%# This work is made available to you under the terms of Version 2 of
+%# the GNU General Public License. A copy of that license should have
+%# been provided with this software, but in any event can be snarfed
+%# from www.gnu.org.
+%#
+%# This work is distributed in the hope that it will be useful, but
+%# WITHOUT ANY WARRANTY; without even the implied warranty of
+%# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+%# General Public License for more details.
+%#
+%# You should have received a copy of the GNU General Public License
+%# along with this program; if not, write to the Free Software
+%# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+%# 02110-1301 or visit their web page on the internet at
+%# http://www.gnu.org/licenses/old-licenses/gpl-2.0.html.
+%#
+%#
+%# CONTRIBUTION SUBMISSION POLICY:
+%#
+%# (The following paragraph is not intended to limit the rights granted
+%# to you to modify and distribute this software under the terms of
+%# the GNU General Public License and is only of importance to you if
+%# you choose to contribute your changes and enhancements to the
+%# community by submitting them to Best Practical Solutions, LLC.)
+%#
+%# By intentionally submitting any modifications, corrections or
+%# derivatives to this work, or any other work intended for use with
+%# Request Tracker, to Best Practical Solutions, LLC, you confirm that
+%# you are the copyright holder for those contributions and you grant
+%# Best Practical Solutions,  LLC a nonexclusive, worldwide, irrevocable,
+%# royalty-free, perpetual, license to use, copy, create derivative
+%# works based on those contributions, and sublicense and distribute
+%# those contributions and any derivatives thereof.
+%#
+%# END BPS TAGGED BLOCK }}}
+<div>
+  <div class="date form-row created">
+% my $c;
+% my $cfs = $Ticket->CustomFieldValues;
+% while (my $cf = $cfs->Next) {
+% if ($cf->CustomField == 18) {   #here is the number which is the custom field's ID (For dev 18 or 89)
+% $c = $cf->Content;
+% }
+% }
+    <div class="label col-3"><&|/l&>CPE ID</&>:</div>\    <!--here is the custom field's name you put above--> 
+    <div class="value col-9"><span class="current-value"><% $c %></span></div>
+  </div>
+  <div class="date form-row created">
+    <div class="label col-3"><&|/l&>Created</&>:</div>\
+    <div class="value col-9"><span class="current-value"><% $Ticket->CreatedObj %></span></div>
+  </div>
+% $m->callback( %ARGS, CallbackName => 'AfterCreated', TicketObj => $Ticket );
+  <div class="date form-row starts<% $Ticket->StartsObj->Unix ? q{} : q{ unset-field}%>">
+    <div class="label col-3"><&|/l&>Starts</&>:</div>\
+    <div class="value col-9"><span class="current-value"><% $Ticket->StartsObj->AsString %></span></div>
+  </div>
+% $m->callback( %ARGS, CallbackName => 'AfterStarts', TicketObj => $Ticket );
+  <div class="date form-row started<% $Ticket->StartedObj->Unix ? q{} : q{ unset-field}%>">
+    <div class="label col-3"><&|/l&>Started</&>:</div>\
+    <div class="value col-9"><span class="current-value"><% $Ticket->StartedObj->AsString %></span></div>
+  </div>
+% $m->callback( %ARGS, CallbackName => 'AfterStarted', TicketObj => $Ticket );
+  <div class="date form-row told<% $Ticket->ToldObj->Unix || $Ticket->CurrentUserHasRight('ModifyTicket') ? q{} : q{ unset-field}%>">
+    <div class="label col-3">
+% if ( $Ticket->CurrentUserHasRight('ModifyTicket' ) ) {
+<a href="<% RT->Config->Get('WebPath') %>/Ticket/Display.html?id=<% $Ticket->id %>&Action=SetTold"><&|/l&>Last Contact</&></a>:
+% } else {
+<&|/l&>Last Contact</&>:
+% }
+</div><div class="value col-9"><span class="current-value"><% $Ticket->ToldObj->AsString %></span></div>
+  </div>
+% $m->callback( %ARGS, CallbackName => 'AfterTold', TicketObj => $Ticket );
+
+  <div class="date form-row due<% $Ticket->DueObj->Unix ? q{} : q{ unset-field}%>">
+    <div class="label col-3"><&|/l&>Due</&>:</div>\
+% my $due = $Ticket->DueObj;
+% if ( $due && $due->IsSet && $due->Diff < 0 && $Ticket->QueueObj->IsActiveStatus($Ticket->Status) ) {
+    <div class="value col-9"><span class="current-value"><span class="overdue"><% $due->AsString  %></span></div></span>
+% } else {
+    <div class="value col-9"><span class="current-value"><% $due->AsString  %></span></div>
+% }
+  </div>
+% $m->callback( %ARGS, CallbackName => 'AfterDue', TicketObj => $Ticket );
+
+  <div class="date form-row resolved<% $Ticket->ResolvedObj->Unix ? q{} : q{ unset-field}%>">
+    <div class="label col-3"><&|/l&>Closed</&>:</div>\
+    <div class="value col-9"><span class="current-value"><% $Ticket->ResolvedObj->AsString  %></span></div>
+  </div>
+% $m->callback( %ARGS, CallbackName => 'AfterResolved', TicketObj => $Ticket );
+
+  <div class="date form-row updated">
+    <div class="label col-3"><&|/l&>Updated</&>:</div>\
+% my $UpdatedString = $Ticket->LastUpdated ? loc("[_1] by [_2]", $Ticket->LastUpdatedAsString, $m->scomp('/Elements/ShowUser', User => $Ticket->LastUpdatedByObj)) : loc("Never");
+% if ($UpdatedLink) {
+    <div class="value col-9"><span class="current-value"><a href="<% $UpdatedLink %>"><% $UpdatedString | n %></a></span></div>
+% } else {
+    <div class="value col-9"><span class="current-value"><% $UpdatedString | n %></span></div>
+% }
+  </div>
+% $m->callback( %ARGS, CallbackName => 'AfterUpdated', TicketObj => $Ticket );
+  <& /Ticket/Elements/ShowCustomFields, Ticket => $Ticket, Grouping => 'Dates', Table => 0 &>
+% $m->callback( %ARGS, CallbackName => 'EndOfList', TicketObj => $Ticket );
+</div>
+<%ARGS>
+$Ticket => undef
+$UpdatedLink => 1
+</%ARGS>
+<%INIT>
+if ($UpdatedLink and $Ticket) {
+    my $txns = $Ticket->Transactions;
+    $txns->OrderByCols(
+        { FIELD => "Created",   ORDER => "DESC" },
+        { FIELD => "id",        ORDER => "DESC" },
+    );
+    $txns->RowsPerPage(1);
+
+    if (my $latest = $txns->First) {
+        $UpdatedLink = "#txn-" . $latest->id;
+    } else {
+        undef $UpdatedLink;
+    }
+}
+</%INIT>
