@@ -46,15 +46,15 @@
 %#
 %# END BPS TAGGED BLOCK }}}
 <div>
-  <div class="date form-row created">
 % my $c;
 % my $cfs = $Ticket->CustomFieldValues;
 % while (my $cf = $cfs->Next) {
-% if ($cf->CustomField == 18) {   #here is the number which is the custom field's ID (For dev 18 or 89)
+% if ($cf->CustomField == 11) {   
 % $c = $cf->Content;
 % }
 % }
-    <div class="label col-3"><&|/l&>CPE ID</&>:</div>\    <!--here is the custom field's name you put above--> 
+  <div class="date form-row created">
+    <div class="label col-3"><&|/l&>CPE ID</&>:</div>\
     <div class="value col-9"><span class="current-value"><% $c %></span></div>
   </div>
   <div class="date form-row created">
